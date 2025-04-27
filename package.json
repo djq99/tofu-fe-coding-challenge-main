@@ -1,0 +1,57 @@
+{
+  "name": "tofu",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@headlessui/react": "2.1.2",
+    "@heroicons/react": "^2.0.18",
+    "@hookform/error-message": "^2.0.1",
+    "@hookform/resolvers": "^3.3.2",
+    "@next/env": "^14.2.5",
+    "@tailwindcss/forms": "^0.5.6",
+    "@tailwindcss/line-clamp": "^0.4.4",
+    "@tanstack/react-query": "^4.35.3",
+    "@types/react-dom": "^18.3.0",
+    "classnames": "^2.3.2",
+    "dotenv": "^16.4.5",
+    "jotai": "^2.3.1",
+    "jsdom": "^24.1.1",
+    "lodash": "^4.17.21",
+    "next": "^14.2.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.48.2",
+    "react-resizable-panels": "^2.1.2"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "scriptsComments": {
+    "move-static": "The WebViwer package requires us to move its static files to the build folder. https://docs.apryse.com/documentation/web/get-started/npm/"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@svgr/webpack": "^8.1.0",
+    "@tailwindcss/typography": "^0.5.13",
+    "@types/node": "^20.10.1",
+    "@types/react": "^18.3.3",
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.21",
+    "prettier": "2.8.8",
+    "tailwindcss": "^3.3.2",
+    "typescript": "5.3.3"
+  }
+}

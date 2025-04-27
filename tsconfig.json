@@ -1,0 +1,47 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/components/*": ["/components/*"],
+      "@/atoms/*": ["/atoms/*"],
+      "@/utils/*": ["/utils/*"],
+      "@/hooks/*": ["/hooks/*"],
+      "@/types/*": ["/types/*"],
+      "@/integrations/*": ["/integrations/*"]
+    },
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "incremental": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "downlevelIteration": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "strictNullChecks": true,
+    "types": []
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "app/factory/index.js",
+    "components/factory/campaign/campaignContent.jsx",
+    "components/factory/campaign/campaignMain.jsx",
+    "components/errorBoundry.jsx",
+    "pages/_error.js",
+    "tests/e2e/playbookAssets.test.js"
+  ],
+  "exclude": ["node_modules"]
+}
