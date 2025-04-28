@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import Spinner from "@/components/core/spinner";
+import { tofuHoveredElement } from "@/utils/factoryHelpers";
 
 const WEBSITE_IFRAME_HTML_ID = "website-iframe";
 
 const Web = () => {
   const iframeRef = useRef(null);
+  const hoverStyleRef = useRef(null);
   const [htmlContent, setHtmlContent] = useState(null);
   const [fetchingHtml, setFetchingHtml] = useState(false);
 
@@ -25,6 +27,34 @@ const Web = () => {
     await fetchAndSetHtml("/landing-page.html");
   };
 
+  const loadIframeHandler = () => {
+    const frame = iframeRef.current;
+    if (frame && frame.contentDocument) {
+      frame.contentDocument.addEventListener('mouseover', (event) => {
+        const hoveredElement = event.target;
+        console.log("Hovered Element:", hoveredElement);
+        if (hoveredElement && hoveredElement.getAttribute('data-tofu-id')) {
+          hoverStyleRef.current = hoveredElement.className;
+          hoveredElement.className = hoveredElement.className + " " + tofuHoveredElement;
+        }
+      });
+
+      frame.contentDocument.addEventListener('mouseout', (event) => {
+        const hoveredElement = event.target;
+        if (hoveredElement && hoveredElement.getAttribute('data-tofu-id')) {
+          hoveredElement.className = hoverStyleRef.current;
+        }
+      });
+      frame.contentDocument.addEventListener('click', (event) => {
+        const clickedElement = event.target;
+        if (clickedElement && clickedElement.getAttribute('data-tofu-id')) {
+          const elementId = clickedElement.getAttribute('data-tofu-id');
+          const elementClass = clickedElement.className;
+        }
+      });
+    }
+  }
+
   useEffect(() => {
     initDisplayContent();
   }, []);
@@ -44,6 +74,7 @@ const Web = () => {
           ref={iframeRef}
           referrerPolicy="no-referrer"
           sandbox="allow-same-origin allow-scripts"
+          onLoad={loadIframeHandler}
         ></iframe>
       </div>
     </>
