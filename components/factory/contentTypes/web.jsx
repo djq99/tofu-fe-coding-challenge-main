@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import Spinner from "@/components/core/spinner";
 import { tofuHoveredElement } from "@/utils/factoryHelpers";
 import { useFetchContentGroup, useUpdateContentGroup } from "@/hooks/api/contentGroup";
-import uniqBy from 'lodash/uniqBy';
 
 
 const WEBSITE_IFRAME_HTML_ID = "website-iframe";
@@ -26,7 +25,7 @@ const Web = () => {
       el.removeAttribute('data-tofu-selected');
     });
 
-    comps?.forEach(({ id }) => {
+    Object.keys(comps || {}).forEach((id) => {
       const el = doc.querySelector(`[data-tofu-id="${id}"]`);
       if (el) {
         el.classList.add(tofuHoveredElement);
@@ -105,13 +104,19 @@ const Web = () => {
         text: el.textContent?.trim() ?? '',
       };
 
-      const prevComponents =
-        contentGroupRef.current?.components ?? [];
-      const exist = prevComponents.find((c) => c.id === componentId);
-      const updatedComponents = exist
-        ? prevComponents.filter((c) => c.id !== componentId)
-        : uniqBy([...prevComponents, newComponent], 'id');
+      const prev = contentGroupRef.current?.components ?? {};
+      const exist = !!prev[componentId];
+      const updatedComponents = { ...prev };
 
+      if (exist) {
+        delete updatedComponents[componentId];
+        el.classList.remove(tofuHoveredElement);
+        el.removeAttribute('data-tofu-selected');
+      } else {
+        updatedComponents[componentId] = newComponent;
+        el.classList.add(tofuHoveredElement);
+        el.dataset.tofuSelected = 'true';
+      }
       const payload = {
         components: updatedComponents
       };

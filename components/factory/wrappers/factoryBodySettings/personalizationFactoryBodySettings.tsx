@@ -20,6 +20,7 @@ const PersonalizationFactoryBodySettings = ({ content, campaign }) => {
               fixedButtonsPaddingRight={calculateFixedButtonsPaddingRight(
                 leftPanelSize
               )}
+              campaign={campaign}
             />
           </div>
         </Panel>

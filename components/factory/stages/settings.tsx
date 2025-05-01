@@ -1,19 +1,65 @@
-import { useMemo, useEffect, useCallback } from "react";
+import { useMemo, useEffect, useCallback, useState } from "react";
 import Accordion from "../../../components/core/accordion";
 import { useFetchContentGroup, useUpdateContentGroup } from "../../../hooks/api/contentGroup";
-
+import TargetSelectDropdown from "../../..//components/core/targetSelectDropdown";
+import { useContentGeneration, useFetchContent, useUpdateContent } from "hooks/api/content";
 const contentGroupId = 320321;
+const contentId = 258401961;
 
-const Settings = () => {
+const Settings = ({ campaign }) => {
   const windowWidth = useMemo(() => window?.innerWidth, [window?.innerWidth]);
   const { contentGroup, isLoading } = useFetchContentGroup(contentGroupId);
   const { updateContentGroup } = useUpdateContentGroup();
+  const { contentData: liveContent, refetch: refetchContent } = useFetchContent(contentId);
+  const { updateContent: saveTarget, isLoading: isSaving } = useUpdateContent();
+  const { generateContent: genContent, isLoading: isGenerating } = useContentGeneration();
+
+  console.log('campaign', campaign);
+  console.log('contentData', liveContent);
+  const targets = useMemo(() => {
+    const rawTargets =
+      Object.values(campaign.targets[0] ?? {}).find(Array.isArray) ?? [];
+
+    return rawTargets;
+  }, [campaign]);
+
+  const [selectedTarget, setSelectedTarget] = useState(
+    targets[0] ?? null
+  );
+
+  const handleGenerate = async () => {
+    if (!selectedTarget) return;
+    console.log("selectedTarget", selectedTarget);
+
+    try {
+      await saveTarget({
+        id: contentId,
+        payload: {
+          components: contentGroup?.components,
+          content_params: {
+            targets: {
+              [`Targets for FE coding challenge`]: selectedTarget,
+            },
+          },
+        },
+      });
+
+      await genContent({
+        id: contentId,
+        payload: { params: { joint_generation: false } },
+      });
+
+      await refetchContent();
+    } catch (err) {
+      console.error("Generation failed:", err);
+    }
+  };
 
   const grouped = useMemo(() => {
-    const comps = contentGroup?.components ?? [];
+    const compsArr = Object.values(contentGroup?.components ?? {}) as Array<{ meta?: { type?: string, selected_element?: string }, [key: string]: any }>;
     return {
-      text: comps.filter((c) => c.meta?.type === 'text'),
-      image: comps.filter((c) => c.meta?.type === 'image'),
+      text: compsArr.filter((c) => c.meta?.type === 'text'),
+      image: compsArr.filter((c) => c.meta?.type === 'image'),
     };
   }, [contentGroup]);
 
@@ -24,8 +70,9 @@ const Settings = () => {
 
   const handleDelete = useCallback(
     (idToRemove: string) => {
-      const prev = contentGroup?.components ?? [];
-      const updated = prev.filter((c) => c.id !== idToRemove);
+      const prev = contentGroup?.components ?? {};
+      const updated = { ...prev };
+      delete updated[idToRemove];
 
       updateContentGroup({
         id: contentGroupId,
@@ -113,7 +160,7 @@ const Settings = () => {
                   <div className="w-12 h-12 flex items-center justify-center rounded bg-slate-800">
                     <span
                       className="max-w-[300px] max-h-[360px] shrink-0 overflow-hidden rounded"
-                      dangerouslySetInnerHTML={{ __html: c.meta.selected_element }}
+                      dangerouslySetInnerHTML={{ __html: c.meta?.selected_element || "" }}
                     />
                     <button
                       onClick={() => handleDelete(c.id)}
@@ -152,6 +199,18 @@ const Settings = () => {
                 Once we get it right, Tofu will apply those learnings to your
                 other targets.
               </p>
+              <TargetSelectDropdown
+                targets={targets}
+                value={selectedTarget}
+                onChange={setSelectedTarget}
+              />
+              <button
+                onClick={handleGenerate}
+                disabled={isSaving || isGenerating || !selectedTarget}
+                className="mt-4 inline-flex items-center justify-center rounded bg-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+              >
+                {isSaving || isGenerating ? "Generating…" : "Generate"}
+              </button>
             </div>
           </Accordion>
         </div>
