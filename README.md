@@ -18,65 +18,39 @@ API_SERVER=https://dev.api.tofuhq.com/api
 USER_TOKEN= ----- PROVIDED TO YOU VIA EMAIL -----
 ```
 
-What Went Well ⭐️
+## What Went Well ⭐️
 
-Modular React architecture: Breaking the UI into composable hooks (useFetchContentGroup, useUpdateContentGroup, etc.) and pure components allowed rapid iteration and reuse across Web & Settings panes.
+- **Modular React architecture** – breaking the UI into composable hooks (`useFetchContentGroup`, `useUpdateContentGroup`, etc.) and pure components allowed rapid iteration and reuse across Web & Settings panes.
+- **Optimistic UI with TanStack Query** – the cache-merge strategy (`mergeWithOverride`) gave users instant feedback when selecting/un-selecting components and when injecting generated variations.
+- **Iframe injection logic** – injecting highlights *and* generated results directly into the embedded landing-page HTML created a seamless WYSIWYG experience without a full reload.
+- **Headless UI dropdown** – using `@headlessui/react`’s `Listbox` produced an accessible, keyboard-friendly target selector with very little code.
 
-Optimistic UI with TanStack Query: The cache merge strategy (mergeWithOverride) gave users instant feedback when selecting/un‑selecting components and when injecting generated variations.
+## What Didn’t Go So Well / To Improve ⚠️
 
-Iframe injection logic: Injecting highlights and generated results directly into the embedded landing‑page HTML created a seamless WYSIWYG experience without needing a page reload.
+| Area | Current state | Improvement idea |
+|------|---------------|------------------|
+| **State duplication** | Selected components live both in React state *and* inside the iframe DOM. | Introduce a single global store (Context/Zustand) or generate the DOM directly from state. |
+| **Error surfaces** | API failures are logged to `console.error`. | Replace with toast notifications + retry helpers. |
+| **Tests** | No Jest / RTL coverage yet. | Add unit tests for hooks and iframe mutations. |
 
-Headless UI dropdown: Using Headless UI’s Listbox produced an accessible, fully keyboard‑navigable target selector with minimal code.
+## What I Learned 📚
 
-What Needs Improvement ⚠️
+1. **Deep merge pitfalls** – merging arrays inside TanStack Query’s `onMutate` needs `lodash/mergeWith` with a customiser; plain `merge` silently overwrites.
+2. **Iframe reactivity** – updating an iframe’s DOM from React requires refs + effect ordering to avoid stale closures.
+3. **Backend schema quirks** – the `targets` payload had to be an *object of objects* (not a list) to satisfy the Django `.keys()` expectation.
 
-State duplication: Selected components live both in React state and inside the iframe DOM.  A single source of truth (e.g. Context or zustand store) would simplify lifecycle bugs.
+## Future UX Enhancements 🛠️
 
-Error handling: API calls currently log to console.error; user‑visible toasts and retry logic are still TODO.
+1. Real-time diff view so users can preview multiple variation options before committing.
+2. Undo / redo stack for component selection and generation actions.
+3. Persisted panel widths and theme preferences per user.
+4. Global toast / snackbar system for unified feedback.
 
-Unit tests: No Jest/React‑Testing‑Library coverage yet for hooks or iframe injection.
+## API Feedback & Suggestions 📮
 
-What I Learned 📚
-
-Deep merge pitfalls: When merging arrays inside TanStack Query’s onMutate, lodash/mergeWith with a customiser is safer than plain merge.
-
-Iframe reactivity: Updating an iframe’s DOM from React requires careful use of refs + mutation observers to avoid stale closures.
-
-Backend schema quirks: The targets payload had to be an object‑of‑objects (not a list) to satisfy the Django .keys() expectation.
-
-Future UX Enhancements 🛠️
-
-Real‑time diff view so users can preview multiple variation options side‑by‑side before committing.
-
-Undo/redo stack for component selection and content generation.
-
-Drag‑resize panels with persisted widths per user.
-
-Global toast system for unified success/error feedback.
-
-API Feedback 📮
-
-Endpoint
-
-Feedback
-
-Improvement Suggestion
-
-PATCH /content/{id}/
-
-Accepts only object‑of‑objects for targets; error message was a Django trace.
-
-Return a 400 JSON with a clear schema hint instead of a 500 stacktrace.
-
-POST /content/{id}/gen/
-
-Requires prior target save; fails silently if pre‑req missing.
-
-Auto‑validate whether content_params.targets exists and include helpful response text.
-
-GET /content/{id}/
-
-Missing CORS max‑age headers → extra preflight on every request.
-
-Add Access‑Control-Max‑Age for better perf.
-
+| Endpoint | Feedback | Improvement Suggestions |
+|----------|----------|-------------------------|
+| `PATCH /content/{id}/` | Requires `targets` to be an object. When shape is wrong the server returns a 500 with a Django stack trace. | Respond with `400` JSON that includes the expected schema. |
+| `POST /content/{id}/gen/` | Silent failure if targets aren’t set first; the error message isn’t actionable. | Validate prerequisites and return a descriptive message. |
+| **Environment reset** | During development we occasionally needed the backend team to *manually* reset our saved targets/content. | Provide a **`POST /admin/reset-db`** (or similar) endpoint guarded by auth so devs can reset data without ops intervention. |
+| CORS | Every request triggers a preflight. | Add `Access-Control-Max-Age` to CORS responses. |
